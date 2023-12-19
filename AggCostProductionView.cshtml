@@ -1,0 +1,113 @@
+﻿@model BusinessLayer.Entity.Agg_CostProd_View
+
+
+
+<style>
+    .form-group > label {
+        font-weight: 800;
+    }
+</style>
+
+
+
+<div class="pd-20 card-box mb-30">
+    <div class="form-group row">
+        <label class="col-sm-12 col-md-2 bold">Location</label>
+        <div class="col-sm-12 col-md-4">
+            @Model.locationName
+        </div>
+
+        <label class="col-sm-12 col-md-2 col-form-label required">Product</label>
+        <div class="col-sm-12 col-md-4">
+
+            @Model.productName
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-12 col-md-2 col-form-label required">Plant/Mine</label>
+        <div class="col-sm-12 col-md-4">
+
+            @Model.Long_Name
+        </div>
+        <label class="col-sm-12 col-md-2 col-form-label required">Effective Date</label>
+        <div class="col-sm-12 col-md-4">
+
+            @Model.EFFECTIVE_DATE
+        </div>
+    </div>
+    @if (Model.AggCostView_List != null)
+    {
+        if (Model.AggCostView_List.Count > 0)
+        {
+
+            <div class="form-group row">
+                <div class="table-responsive">
+                    <table class="table table-bordered" style="font-size: 10px; padding: 0px; margin: 0px; min-width: 600px;" id="tblList">
+                        <thead>
+                            <tr>
+                                <th style="width:395px; text-align:center;">Particulars</th>
+                                <th style="width:5px; text-align:center;">Standard Cost Per M.T.</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="tbodyList">
+                            @{
+            string lastGroup = null;
+                            }
+                            @for (int i = 0; i < Model.AggCostView_List.Count(); i++)
+                            {
+                                var currentGroup = Model.AggCostView_List[i].PCG_NAME;
+                              
+                                if (lastGroup != currentGroup)
+                                {
+                                    lastGroup = currentGroup;
+                                    <tr id="tr_@i">
+                                        <td data-title="Particulars">
+                                            <strong style="font-size: 16px; font-weight: bold;">
+                                                @Html.DisplayFor(model => model.AggCostView_List[i].PCG_NAME, new { @class = "form-control cal numeric", @id = "txtPCG_NAME_" + i, @autocomplete = "off", @readonly = true })
+                                                @Model.AggCostView_List[i].PCG_NAME
+                                            </strong>
+                                            @Html.HiddenFor(model => model.AggCostView_List[i].PCG_ID, new { @class = "form-control", @id = "hdnPCG_ID_" + i })
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            @Html.HiddenFor(model => model.AggCostView_List[i].PCSG_ID, new { @class = "form-control", @id = "hdnSHH_ID_" + i })
+                                            @Html.TextBoxFor(model => model.AggCostView_List[i].PCSG_NAME, new { @class = "form-control cal numeric", @id = "txtPCSG_NAME_" + i, @autocomplete = "off", @readonly = true })
+                                            @*@Model.AggCostView_List[i].PCSG_NAME*@
+                                        </td>
+                                        <td data-title="Standard Cost Per M.T.">
+                                            @Html.TextBoxFor(model => model.AggCostView_List[i].StandardCost, new { @class = "form-control", @id = "txtStandardCost_" + i, @data_placeholder = "Enter Condition", @autocomplete = "off", @readonly = true })
+                                            @*@Model.AggCostView_List[i].StandardCost*@
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                      
+                                        <td>
+                                            @Html.HiddenFor(model => model.AggCostView_List[i].PCSG_ID, new { @class = "form-control", @id = "hdnPCSG_ID_" + i })
+                                            @Html.TextBoxFor(model => model.AggCostView_List[i].PCSG_NAME, new { @class = "form-control cal numeric", @id = "txtPCSG_NAME_" + i, @autocomplete = "off", @readonly = true })
+                                            @Html.HiddenFor(model => model.AggCostView_List[i].PCG_ID, new { @class = "form-control", @id = "hdnPCG_ID_" + i })
+
+
+                                        </td>
+                                        <td data-title="Standard Cost Per M.T.">
+                                            @Html.TextBoxFor(model => model.AggCostView_List[i].StandardCost, new { @class = "form-control", @id = "txtStandardCost_" + i, @data_placeholder = "Enter Condition", @autocomplete = "off", @readonly = true })
+                                        </td>
+                                    </tr>
+
+                                }
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        }
+    }
+    @*@Html.HiddenFor(x => x.SC_ID)
+        @Html.HiddenFor(X => X.hdnAGGCOSTPROD_DATE, new { @id = "hdnAGGCOSTPROD_DATE" })*@
+</div>
+

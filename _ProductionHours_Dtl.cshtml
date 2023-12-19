@@ -1,0 +1,270 @@
+﻿@model BusinessLayer.Entity.ProductionHour
+
+<div class="card-box mb-30" style="padding:10px;">
+    <div class="table-responsive">
+        <table class="table table-bordered" style="font-size:10px; padding:0px;  margin:0px;min-width:600px;" id="tblList">
+            <thead>
+                <tr>
+                    <th style="width:100px;text-align:center;">Particulars</th>
+                    <th style="width:100px;text-align:center;">Time</th>
+                    <th style="width:100px;text-align:center;">Remarks</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyList">
+                @for (int i = 0; i < Model.ProductionHour_List.Count(); i++)
+                {
+                    <tr id="tr_@i">
+                        <td data-title="Particulars">
+                            @Html.TextBoxFor(model => model.ProductionHour_List[i].EM_NAME, new { @class = "form-control cal numeric", @id = "txtPM_NAME_" + i, @autocomplete = "off", @readonly = true })
+                            @Html.HiddenFor(model => model.ProductionHour_List[i].EM_ID, new { @class = "form-control", @id = "hdnEM_ID_" + i })
+                            @Html.HiddenFor(model => model.ProductionHour_List[i].PHH_ID, new { @class = "form-control", @id = "hdnPHH_ID_" + i })
+                        </td>
+                        <td data-title="Time">
+                            @Html.TextBoxFor(model => model.ProductionHour_List[i].TIME, new { @class = "form-control text24HrsTime", @id = "txtTIME_" + i, @placeholder = "HH:MM", @style = "padding-top: 0px;",@maxlength = "5", @data_placeholder = "Enter Time", @autocomplete = "off", @type = "text" })
+                              <span id="spnErr_txtTime_@i" class=" field-validation-error"></span>
+                        </td>
+                            
+                        <td data-title="Remarks">
+                            @Html.TextBoxFor(model => model.ProductionHour_List[i].REMARKS, new { @class = "form-control", @id = "txtREMARKS_" + i, @data_placeholder = "Enter Remarks", @autocomplete = "off" })
+                            <span id="spnErr_txtRemarks_@i" class=" field-validation-error"></span>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+            <tfoot style="font-size: 14px;">
+                <tr>
+                    <th style="text-align:center;padding:10px;">HOURS/DAY</th>
+                    <th style="text-align:center;padding:10px;"><span id="spnTotalTime" style="color:red;">00.00 </span></th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    @if (Model.ProductionHour_List != null)
+    {
+        if (Model.ProductionHour_List.Count() > 0)
+        {
+            @Html.HiddenFor(model => model.ProductionHour_List[0].PH_ID, new { @class = "form-control", @id = "hdnPH_ID" })
+            @Html.HiddenFor(model => model.ProductionHour_List[0].IS_LOCKED, new { @class = "form-control", @id = "hdnIS_LOCKED" })
+
+        }
+    }
+</div>
+
+<script src="~/FormJS/PRODUCTIONHOUR.js"></script>
+<script>
+
+
+
+    $(".text24HrsTime").on("input", function (e) {
+
+   
+        var strlen = e.target.value.length;
+        var charCode = e.which || e.keyCode;
+
+        //console.log(strlen);
+
+        if (strlen > 5) {
+            e.preventDefault();
+            return false;
+        }
+    
+        // Checks for 1st Character
+        if (strlen >= 0 && strlen < 1) {
+            if (!(charCode >= 48 && charCode <= 50)) {
+                e.preventDefault();
+                return false;
+            } 
+        }
+
+
+        // Checks for 2nd Character
+        if (strlen >= 1 && strlen < 2) {
+            if (e.target.value.substring(0, 1) == 2)  {
+                if (!(charCode >= 48 && charCode <= 51)) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            else {
+                if (!(charCode >= 48 && charCode <= 57)) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        }
+
+        // Checks for 3rd Character
+        if (strlen == 2) {
+            $(this).val(e.target.value + ":");
+
+            if (!(charCode >= 48 && charCode <= 53)) {
+                e.preventDefault();
+                return false;
+            }
+        }
+   
+        // Checks for 4th Character
+        if (strlen > 2 && strlen < 4) {    
+            if (!(charCode >= 48 && charCode <= 53)) {
+                e.preventDefault();
+                return false;
+            }
+        }
+
+        // Checks for 5th Character
+        if (strlen >= 4 && strlen < 6)    {
+            if (!(charCode >= 48 && charCode <= 57)) {
+                e.preventDefault();
+                return false;
+            } 
+        }
+        
+ 
+    });
+
+    $(".text24HrsTime").on("blur", function () {
+        var inputValue = $(this).val();
+        var parts = inputValue.split(":");
+
+        if (parts.length === 1 && !isNaN(parts[0])) {
+            // If user entered only the hour part, append ":00"
+            var hours = parseInt(parts[0]);
+            if (!isNaN(hours)) {
+                var formattedValue = hours + ":00";
+                $(this).val(formattedValue);
+            }
+        } else if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+            // If user entered both hours and minutes, format the value
+            var hours = parseInt(parts[0]);
+            var minutes = parseInt(parts[1]);
+
+            // Ensure the resulting string remains a valid time format
+            if (!isNaN(hours) && !isNaN(minutes)) {
+                var formattedValue = hours + ":" + (minutes < 10 ? "0" : "") + minutes;
+                $(this).val(formattedValue);
+            }
+        }
+    });
+
+    updateTotalTime();
+    $('#tblList input[id*="txtTIME_"]').on('input', function () {
+
+
+        updateTotalTime();
+    });
+
+    $(document).click(function () {
+        updateTotalTime();
+    });
+
+    $('#ddlPlant').change(function () {
+        updateTotalTime()
+    });
+
+    $("#btnSubmit").click(function (e) {
+        var totalHours = calculateTotalTime();
+        if (totalHours > 1440) {
+            alert("Total time should not exceed 24 hours.");
+            e.preventDefault();
+            return;
+        }
+        var errCnt = 0;
+        var rowCount = $('#tbodyList tr').length;
+        for (var i = 0; i < rowCount; i++) {
+            var txtTIME_ = $('#txtTIME_' + i).val();
+            var txtRemarks_ = $('#txtREMARKS_' + i).val();
+
+            if (txtTIME_ != '') {
+                if (txtRemarks_ === '') {
+                    alert("Remarks are mandatory when time is entered in row " + (i + 1));
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            if (txtTIME_ != '' && txtRemarks_ != '') {
+                errCnt = errCnt + 1;
+            }
+        }
+
+        if (errCnt == 0) {
+            $('#lblMsg').text('Please fill in at least one row of data.');
+            $('#alert-modal').modal('show');
+            e.preventDefault();
+        }
+    });
+
+    function updateTotalTime() {
+        var totalHours = calculateTotalTime();
+        if (totalHours > 1440) {
+            alert("Total time should not exceed 24 hours.");
+            var lastTextBox = $('#tblList input[id*="txtTIME_"]').last();
+            $(lastTextBox).val('');
+        }
+
+        $('#spnTotalTime').text(formatTime(totalHours));
+    }
+
+    function calculateTotalTime() {
+        var totalMinutes = 0;
+        $('#tblList input[id*="txtTIME_"]').each(function () {
+            var timeValue = $(this).val();
+            var timeParts = timeValue.split(':');
+
+            if (timeParts.length === 2) {
+                var hours = parseInt(timeParts[0]) || 0;
+                var minutes = parseInt(timeParts[1]) || 0;
+                totalMinutes += hours * 60 + minutes;
+            }
+        });
+        return totalMinutes;
+    }
+
+    $("#btnUpdate").click(function (e) {
+        var totalHours = calculateTotalTime();
+        if (totalHours > 1440) {
+            alert("Total time should not exceed 24 hours.");
+            e.preventDefault();
+            return;
+        }
+        var errCnt = 0;
+        var rowCount = $('#tbodyList tr').length;
+    });
+
+    function updateTotalTime() {
+        var totalHours = calculateTotalTime();
+        if (totalHours > 1440) {
+            alert("Total time should not exceed 24 hours.");
+            var lastTextBox = $('#tblList input[id*="txtTIME_"]').last();
+            $(lastTextBox).val('');
+        }
+
+        $('#spnTotalTime').text(formatTime(totalHours));
+
+    }
+
+    function calculateTotalTime() {
+        var totalMinutes = 0;
+        $('#tblList input[id*="txtTIME_"]').each(function () {
+            var timeValue = $(this).val();
+            var timeParts = timeValue.split(':');
+
+            if (timeParts.length === 2) {
+                var hours = parseInt(timeParts[0]) || 0;
+                var minutes = parseInt(timeParts[1]) || 0;
+                totalMinutes += hours * 60 + minutes;
+            }
+        });
+
+        return totalMinutes;
+    }
+
+    function formatTime(minutes) {
+        var hours = Math.floor(minutes / 60);
+        var remainingMinutes = minutes % 60;
+        return hours + ":" + (remainingMinutes < 10 ? '0' : '') + remainingMinutes;
+    }
+
+</script>

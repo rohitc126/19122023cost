@@ -1,0 +1,217 @@
+﻿@model BusinessLayer.Entity.AggCost_Production
+
+@{
+    ViewBag.Title = "Standard Cost Of Production";
+    Layout = "~/Views/Shared/_MainDashboard.cshtml";
+}
+
+
+<style>
+    .table thead th {
+        font-weight: 400;
+        font-size: 15px;
+        border-bottom: 0;
+        padding-left: 1rem;
+    }
+
+    .table td {
+        font-weight: 400;
+        font-size: 11px;
+        border-bottom: 0;
+        padding-left: 1rem;
+    }
+
+    .table td, .table th {
+        padding: 0.25rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .table td, .table th {
+        padding: 0.25rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .table .form-control {
+        height: 35px;
+    }
+</style>
+
+@using (Html.BeginForm("AggCostProduction_Entry", "AggCostReport", FormMethod.Post, new { @id = "frmAggCostProduction_Entry", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    Html.RenderPartial("_Alerts");
+
+    <div class="pd-20 card-box mb-30">
+        <div class="clearfix">
+            <div style="text-align:center">
+                <h4 class="text-blue h4">Standard Cost Of Production</h4>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-12 col-md-2 col-form-label">Location</label>
+            <div class="col-sm-12 col-md-4">
+                @Html.DropDownListFor(x => x.LocationCode, Model.Location_List, "Select Location", new { @class = "custom-select2 form-control", @id = "ddlLocation", @data_placeholder = "Select Location", @style = "width: 100%;" })
+
+                @Html.ValidationMessageFor(x => x.LocationCode, "", new { @id = "spnErr_Location" })
+            </div>
+
+            <label class="col-sm-12 col-md-2 col-form-label">Product</label>
+            <div class="col-sm-12 col-md-4">
+                @Html.DropDownListFor(x => x.ProductCode, Model.PRODUCT_LIST, "Select Product", new { @class = "custom-select2 form-control", @id = "ddlProduct", @data_placeholder = "Select Product", @style = "width: 100%;" })
+                @*@Html.DropDownListFor(x => x.ProductCode, new SelectList(Enumerable.Empty<SelectListItem>(), "Value", "Text"), "Select Product", new { @class = "custom-select2 form-control", @id = "ddlProduct", @data_placeholder = "Select Product", @style = "width: 100%;" })*@
+
+                @Html.ValidationMessageFor(x => x.ProductCode, "", new { @id = "spnErr_ddlProduct" })
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-12 col-md-2 col-form-label">Plant/Mine</label>
+            <div class="col-sm-12 col-md-4">
+                @Html.DropDownListFor(x => x.ProductMine_code, Model.PLANT_LIST, "ALL", new { @class = "custom-select2 form-control", @id = "ddlPlant", @data_placeholder = "Select Plant/Mine", @style = "width: 100%;" })
+                @*@Html.DropDownListFor(x => x.ProductMine_code, new SelectList(Enumerable.Empty<SelectListItem>(), "Value", "Text"), "Select Plant/Mine", new { @class = "custom-select2 form-control", @id = "ddlPlant", @data_placeholder = "Select  Plant/Mine", @style = "width: 100%;" })*@
+
+                @Html.ValidationMessageFor(x => x.ProductMine_code, "", new { @id = "spnErr_ddlPlant" })
+            </div>
+            <label class="col-sm-12 col-md-2 col-form-label">Effective Date</label>
+            <div class="col-sm-12 col-md-4">
+                @Html.TextBoxFor(x => x.EFFECTIVE_DATE, new { @class = "form-control", @id = "txtEffectiveDate", @autocomplete = "off", @readonly = true })
+            </div>
+        </div>
+
+
+        <div class="table-responsive">
+            <table class="table table-bordered" style="font-size: 10px; padding: 0px; margin: 0px; min-width: 600px;" id="tblList">
+                <thead>
+                    <tr>
+                        <th style="width:395px; text-align:center;">Particulars</th>
+                        <th style="width:5px; text-align:center;">Standard Cost Per M.T.</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyList">
+                    @{
+               string lastGroup = null;
+                    }
+                    @for (int i = 0; i < Model.AggCost_Production_Dtl_List.Count(); i++)
+                    {
+                        var currentGroup = Model.AggCost_Production_Dtl_List[i].PCG_NAME;
+                        //var currentSubgroup = Model.AggCost_Production_Dtl_List[i].PCSG_NAME;
+                        if (lastGroup != currentGroup)
+                        {
+                            lastGroup = currentGroup;
+                            <tr id="tr_@i">
+                                <td data-title="Particulars">
+                                    <strong style="font-size: 16px; font-weight: bold;">
+                                        @Html.DisplayFor(model => model.AggCost_Production_Dtl_List[i].PCG_NAME, new { @class = "form-control cal numeric", @id = "txtPCG_NAME_" + i, @autocomplete = "off", @readonly = true })
+                                    </strong>
+                                    @Html.HiddenFor(model => model.AggCost_Production_Dtl_List[i].PCG_ID, new { @class = "form-control", @id = "hdnPCG_ID_" + i })
+                                    @*@Html.HiddenFor(model => model.AggCost_Production_Dtl_List[i].SCC_ID, new { @class = "form-control", @id = "hdnSCC_ID_" + i })*@
+
+                                   </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    @Html.HiddenFor(model => model.AggCost_Production_Dtl_List[i].PCSG_ID, new { @class = "form-control", @id = "hdnPCSG_ID_" + i })
+                                    @Html.TextBoxFor(model => model.AggCost_Production_Dtl_List[i].PCSG_NAME, new { @class = "form-control cal numeric", @id = "txtPCSG_NAME_" + i, @autocomplete = "off", @readonly = true })
+                                </td>
+                                <td data-title="Standard Cost Per M.T.">
+                                    @Html.TextBoxFor(model => model.AggCost_Production_Dtl_List[i].StandardCost, new { @class = "form-control numeric", @id = "txtStandardCost_" + i, @data_placeholder = "Enter Standard Cost", @autocomplete = "off" })
+                                    <span id="spnErr_txtCONDITION_@i" class="field-validation-error"></span>
+
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td>
+                                    @Html.HiddenFor(model => model.AggCost_Production_Dtl_List[i].PCSG_ID, new { @class = "form-control", @id = "hdnPCSG_ID_" + i})
+                                    @Html.TextBoxFor(model => model.AggCost_Production_Dtl_List[i].PCSG_NAME, new { @class = "form-control cal numeric", @id = "txtPCSG_NAME_" + i, @autocomplete = "off", @readonly = true })
+                                    @Html.HiddenFor(model => model.AggCost_Production_Dtl_List[i].PCG_ID, new { @class = "form-control", @id = "hdnPCG_ID_" + i })
+
+
+                                 </td>
+                                <td data-title="Standard Cost Per M.T.">
+                                    @Html.TextBoxFor(model => model.AggCost_Production_Dtl_List[i].StandardCost, new { @class = "form-control numeric", @id = "txtStandardCost_" + i, @data_placeholder = "Enter Standard Cost", @autocomplete = "off" })
+                                    <span id="spnErr_txtCONDITION_@i" class="field-validation-error"></span>
+                                </td>
+                            </tr>
+
+                        }
+                    }
+                </tbody>
+
+            </table>
+        </div>
+
+
+       
+        <div class="form-group row">
+            <div class="col-md-12" style="padding-top:5px; padding-bottom:15px; padding-right:13px;text-align:center;">
+                <input type="submit" class="btn btn-success" value="Save" name="Save" style="width:auto;" id="btnSubmit" />
+                <input type="reset" class="btn btn-danger" value="Reset" style="width:auto;" id="btnReset" />
+                <input type="button" class="btn btn-warning" value="Back" name="Back" style="width: auto;" id="btnBack" />
+                @Html.HiddenFor(X => X.hdnAGGCOSTPROD_DATE, new { @id = "hdnAGGCOSTPROD_DATE" })
+                @Html.HiddenFor(x => x.SC_ID)
+            </div>
+        </div>
+        <div id="divPartial"></div>
+    </div>
+
+      <div class="modal fade bs-example-modal-lg" id="model-Sheet-dtl" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="width:100%;">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myLargeModalLabel">Standard Cost Production View</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+
+                <div class="modal-body" style="height: 500px; max-height: 500px; overflow: auto;">
+                    <div id="divPartialModel"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+}
+
+<script src="~/assets/js/jquery-2.1.4.min.js"></script>
+<script src="~/Scripts/Custom/customValidation.js"></script>
+<script>
+
+    $(document).ready(function () {
+        //$('#btnSubmit').show();
+        $("#btnReset").on("click", function () {
+            var url = '@Url.Action("AggCostProduction_Entry", "AggCostReport")';
+            window.location.href = url;
+        });
+        $("#btnBack").on("click", function () {
+            var url = '@Url.Action("AggCostProduction", "AggCostReport")';
+            window.location.href = url;
+        });
+
+
+        //$("#frmAggCostProduction_Entry").submit(function (e) {
+        //    List(e);
+        //    e.preventDefault();
+        //});
+
+        //function List(e) {
+      
+            if ($("#txtEffectiveDate").val() != "") {
+                //if (CheckSession(e) == 1) {
+                    $("#divPartial").load("_AggCostProductionList/AggCostReport");
+                    $("#divPartial").css("display", "block");
+                //}
+            }
+            else {
+                $("#divPartial").empty();
+            }
+        //}
+
+      
+    })
+</script>
